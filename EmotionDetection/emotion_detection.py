@@ -2,10 +2,6 @@ import requests
 import json
 
 def emotion_detector(text_to_analyze):
-    """
-    Detect emotions from text using Watson NLP API
-    and return formatted output.
-    """
 
     url = "https://sn-watson-emotion.labs.skills.network/v1/watson.runtime.nlp.v1/NlpService/EmotionPredict"
 
@@ -21,9 +17,19 @@ def emotion_detector(text_to_analyze):
 
     response = requests.post(url, headers=headers, json=input_json)
 
+    # 🔴 ERROR HANDLING
+    if response.status_code == 400:
+        return {
+            "anger": None,
+            "disgust": None,
+            "fear": None,
+            "joy": None,
+            "sadness": None,
+            "dominant_emotion": None
+        }
+
     formatted_response = json.loads(response.text)
 
-    # Extract emotions
     emotions = formatted_response["emotionPredictions"][0]["emotion"]
 
     anger = emotions["anger"]
@@ -32,7 +38,6 @@ def emotion_detector(text_to_analyze):
     joy = emotions["joy"]
     sadness = emotions["sadness"]
 
-    # Find dominant emotion
     emotion_scores = {
         "anger": anger,
         "disgust": disgust,
@@ -43,8 +48,7 @@ def emotion_detector(text_to_analyze):
 
     dominant_emotion = max(emotion_scores, key=emotion_scores.get)
 
-    # Final output format
-    result = {
+    return {
         "anger": anger,
         "disgust": disgust,
         "fear": fear,
@@ -52,5 +56,3 @@ def emotion_detector(text_to_analyze):
         "sadness": sadness,
         "dominant_emotion": dominant_emotion
     }
-
-    return result
